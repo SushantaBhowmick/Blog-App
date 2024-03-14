@@ -8,9 +8,21 @@ import {
 } from "@/components/ui/popover";
 import Link from "next/link";
 import { Button } from "./ui/button";
+import { DashboardIcon, LockOpen1Icon } from "@radix-ui/react-icons";
+import { supabaseBrowser } from "@/lib/supabase/browser";
 
 export default function Profile() {
   const user = useUser((state) => state.user);
+  const setUser = useUser((state) => state.setUser);
+  console.log(user)
+
+  const handleLogout=async()=>{
+    const supabase = supabaseBrowser();
+    await supabase.auth.signOut();
+    setUser(undefined)
+  }
+
+  const isAdmin = user?.user_metadata.role==="admin";
 
   return (
     <div>
@@ -25,16 +37,23 @@ export default function Profile() {
         className=" rounded-full ring-2 ring-green-500"
       />
         </PopoverTrigger>
-        <PopoverContent className="p-2 space-y-3">
+        <PopoverContent className="p-2 space-y-3 divide-y">
             <div className=" px-4 text-sm">
                 <p>{user?.user_metadata?.user_name}</p>
                 <p className=" text-gray-500">{user?.user_metadata?.email}</p>
             </div>
-            <Link href={'/dashboard'}>
-                <Button>
-                    Dashboard
+            {isAdmin && (
+              <Link href={'/dashboard'} className="block">
+              <Button variant={'ghost'} className=" w-full flex items-center justify-between">
+                  Dashboard
+                  <DashboardIcon />
+              </Button>
+          </Link>
+            )}
+            <Button onClick={handleLogout} variant={'ghost'} className=" w-full flex items-center justify-between">
+                    Logout
+                    <LockOpen1Icon />
                 </Button>
-            </Link>
         </PopoverContent>
       </Popover>
     </div>
